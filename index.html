@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nha Trang Hotel Concierge</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #222222);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        .secondary-bg { background-color: var(--tg-theme-secondary-bg-color, #f4f4f4); }
+        .btn-main { background-color: var(--tg-theme-button-color, #2481cc); color: var(--tg-theme-button-text-color, #ffffff); }
+        .hint { color: var(--tg-theme-hint-color, #999999); }
+        .card { background-color: var(--tg-theme-secondary-bg-color, #f8f8f8); border-radius: 12px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="pb-24">
+
+    <header class="p-4 sticky top-0 z-10 secondary-bg border-b border-black/10">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-bold">Nha Trang Plaza 🌴</h1>
+                <p id="room-info" class="text-sm hint">Room: 302 | Guest Mode</p>
+            </div>
+            <div id="status-online" class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+        </div>
+    </header>
+
+    <main class="p-4 space-y-6">
+
+        <div class="flex space-x-2 overflow-x-auto no-scrollbar py-2">
+            <button onclick="switchTab('food')" class="px-4 py-2 rounded-full btn-main text-sm whitespace-nowrap">🍴 Еда</button>
+            <button onclick="switchTab('tours')" class="px-4 py-2 rounded-full card text-sm whitespace-nowrap">🚐 Экскурсии</button>
+            <button onclick="switchTab('info')" class="px-4 py-2 rounded-full card text-sm whitespace-nowrap">ℹ️ Инфо</button>
+        </div>
+
+        <section id="section-food" class="space-y-4">
+            <h2 class="text-lg font-bold">Меню в номер</h2>
+            
+            <div class="card p-4 flex justify-between items-center">
+                <div>
+                    <h3 class="font-semibold">Фо Бо (Beef Noodles)</h3>
+                    <p class="text-xs hint italic">Классика Вьетнама</p>
+                    <p class="font-bold text-blue-500 mt-1">75.000 VND</p>
+                </div>
+                <button onclick="handleOrder('🍲 Фо Бо', '75k')" class="btn-main px-4 py-2 rounded-lg text-sm font-bold active:scale-95 transition-transform">Заказать</button>
+            </div>
+
+            <div class="card p-4 flex justify-between items-center">
+                <div>
+                    <h3 class="font-semibold">Матча Латте Холодная</h3>
+                    <p class="text-xs hint italic">Японский чай, молоко</p>
+                    <p class="font-bold text-blue-500 mt-1">45.000 VND</p>
+                </div>
+                <button onclick="handleOrder('🍵 Матча Латте', '45k')" class="btn-main px-4 py-2 rounded-lg text-sm font-bold active:scale-95 transition-transform">Заказать</button>
+            </div>
+        </section>
+
+        <section id="section-tours" class="hidden space-y-4">
+            <h2 class="text-lg font-bold">Экскурсии из отеля</h2>
+            <div class="card overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=60" class="w-full h-32 object-cover" alt="Dalat">
+                <div class="p-4">
+                    <h3 class="font-bold">Далат: Город Весны</h3>
+                    <p class="text-xs hint mt-1">Водопады, Crazy House, дегустация кофе.</p>
+                    <button onclick="handleOrder('🚐 Тур в Далат', '45$')" class="btn-main w-full mt-3 py-2 rounded-lg font-bold">Бронь $45</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-info" class="hidden space-y-4">
+            <h2 class="text-lg font-bold">Информация о сервисе</h2>
+            <div class="card p-4 space-y-3">
+                <div class="flex justify-between border-b border-black/5 pb-2">
+                    <span class="hint text-sm">Wi-Fi Password:</span>
+                    <span class="font-mono font-bold">NhaTrang888</span>
+                </div>
+                <div class="flex justify-between border-b border-black/5 pb-2">
+                    <span class="hint text-sm">Breakfast Time:</span>
+                    <span class="font-bold">06:30 - 10:00</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="hint text-sm">Gym / Pool:</span>
+                    <span class="font-bold">07:00 - 21:00</span>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div class="fixed bottom-0 left-0 right-0 p-4 secondary-bg border-t border-black/10 flex justify-around">
+        <button onclick="tg.close()" class="text-xs opacity-50">Закрыть</button>
+        <button onclick="handleOrder('🆘 Помощь ресепшн', '0')" class="font-bold text-blue-500">Связаться с отелем</button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        // Смена вкладок
+        function switchTab(tab) {
+            document.getElementById('section-food').classList.add('hidden');
+            document.getElementById('section-tours').classList.add('hidden');
+            document.getElementById('section-info').classList.add('hidden');
+            document.getElementById(`section-${tab}`).classList.remove('hidden');
+            tg.HapticFeedback.impactOccurred('light'); // Виброотклик
+        }
+
+        // Логика заказа
+        function handleOrder(item, price) {
+            tg.showConfirm(`Вы заказываете ${item}. Подтвердить?`, (confirm) => {
+                if (confirm) {
+                    const data = JSON.stringify({
+                        order: item,
+                        price: price,
+                        room: '302',
+                        user: tg.initDataUnsafe?.user?.username || 'Guest'
+                    });
+                    tg.sendData(data); // Отправка данных боту
+                    tg.close();
+                }
+            });
+        }
+
+        // Установка темы (опционально)
+        document.getElementById('room-info').innerText = `Guest: ${tg.initDataUnsafe?.user?.first_name || 'Admin'} | Room: 302`;
+    </script>
+</body>
+</html>
