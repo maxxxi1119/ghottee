@@ -114,20 +114,15 @@
 
         // Логика заказа
         function handleOrder(item, price) {
-            tg.showConfirm(`Вы заказываете ${item}. Подтвердить?`, (confirm) => {
-                if (confirm) {
-                    const data = JSON.stringify({
-                        order: item,
-                        price: price,
-                        room: '302',
-                        user: tg.initDataUnsafe?.user?.username || 'Guest'
-                    });
-                    tg.sendData(data); // Отправка данных боту
-                    tg.close();
-                }
+            const data = JSON.stringify({
+                order: item,
+                price: price,
+                room: '302' // Можешь потом поменять на динамический ввод
             });
+            
+            // Telegram отправит этот текст боту и закроет приложение
+            window.Telegram.WebApp.sendData(data); 
         }
-
         // Установка темы (опционально)
         document.getElementById('room-info').innerText = `Guest: ${tg.initDataUnsafe?.user?.first_name || 'Admin'} | Room: 302`;
     </script>
